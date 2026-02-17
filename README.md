@@ -142,15 +142,6 @@ cargo test
 - Small business owners needing working capital
 - Communities building financial discipline
 
-## 🏆 Drips Wave Submission
-
-This project is submitted for Drips Wave funding to support:
-- Smart contract security audit
-- Frontend development
-- Community education materials
-- Pilot programs in Nigeria and Kenya
-
-See our full proposal in [grants/dripswave-proposal.md](grants/dripswave-proposal.md)
 
 ## 🗺️ Roadmap
 
