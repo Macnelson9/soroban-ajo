@@ -315,6 +315,7 @@ impl AjoContract {
             // Advance to next cycle
             group.current_cycle += 1;
             group.cycle_start_time = utils::get_current_timestamp(&env);
+            events::emit_cycle_advanced(&env, group_id, group.current_cycle, group.cycle_start_time);
         }
         
         // Update storage
