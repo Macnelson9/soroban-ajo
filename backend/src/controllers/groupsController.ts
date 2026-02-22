@@ -93,7 +93,7 @@ export class GroupsController {
   async joinGroup(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params
-      const { publicKey, signedXdr } = req.body
+      const { publicKey, signedXdr }: JoinGroupInput = req.body
       const result = await sorobanService.joinGroup(id, publicKey, signedXdr)
       res.json({ success: true, data: result })
     } catch (error) {
@@ -106,11 +106,11 @@ export class GroupsController {
    *
    * Phase 1 — no signedXdr → returns { unsignedXdr }.
    * Phase 2 — signedXdr present → submits, returns { success, txHash }.
-   */
+   */ 
   async contribute(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params
-      const { amount, publicKey, signedXdr } = req.body
+      const { amount, publicKey, signedXdr }: ContributeInput = req.body
       const result = await sorobanService.contribute(id, publicKey, amount, signedXdr)
       res.json({ success: true, data: result })
     } catch (error) {

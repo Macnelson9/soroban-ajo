@@ -36,25 +36,33 @@ export const createGroupSchema = z.object({
     .min(1, 'Group name is required')
     .max(100, 'Group name must be 100 characters or less'),
   contributionAmount: z
-    .number()
-    .positive('Contribution amount must be positive')
-    .finite('Contribution amount must be a valid number'),
-  cycleDuration: z
-    .number()
-    .int('Cycle duration must be an integer')
-    .positive('Cycle duration must be positive'),
+    .string()
+    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+      message: 'Contribution amount must be a positive number',
+    }),
+  frequency: z
+    .string()
+    .describe('Contribution frequency, e.g. "weekly", "monthly"'),
   maxMembers: z
     .number()
     .int('Max members must be an integer')
     .min(2, 'Max members must be at least 2')
     .max(100, 'Max members cannot exceed 100'),
-  publicKey: stellarPublicKeySchema,
-  description: z.string().max(500, 'Description must be 500 characters or less').optional(),
+    currentMembers: z
+    .number()
+    .int('Current members must be an integer')
+    .min(0, 'Current members cannot be negative')
+    .max(100, 'Current members cannot exceed 100'),
+    // .optional(),
+  adminPublicKey: stellarPublicKeySchema,
+  // signedXdr: z.string().optional(), // For phase 2 of group creation
+  description: z.string().max(500, 'Description must be 500 characters or less'),
 })
 
 // POST /api/groups/:id/join - Join group
 export const joinGroupSchema = z.object({
   publicKey: stellarPublicKeySchema,
+  signedXdr: z.string().optional(), // For phase 2 of joining
 })
 
 // POST /api/groups/:id/contribute - Make contribution
@@ -65,6 +73,7 @@ export const contributeSchema = z.object({
       message: 'Amount must be a positive number',
     }),
   publicKey: stellarPublicKeySchema,
+  signedXdr: z.string().optional(), // For phase 2 of contribution
 })
 
 // Type exports for use in controllers
