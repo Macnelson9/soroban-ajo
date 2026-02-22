@@ -23,7 +23,11 @@ interface FormErrors {
   maxMembers?: string
 }
 
-export const GroupCreationForm: React.FC = () => {
+interface GroupCreationFormProps {
+  onSuccess?: () => void
+}
+
+export const GroupCreationForm: React.FC<GroupCreationFormProps> = ({ onSuccess }) => {
   const [formData, setFormData] = useState<GroupFormData>({
     groupName: '',
     description: '',
@@ -133,6 +137,7 @@ export const GroupCreationForm: React.FC = () => {
       // 3. Show success notification
       // 4. Redirect to group detail page
       console.log('Create group:', formData)
+      onSuccess?.()
     } catch (err) {
       console.error('Failed to create group:', err)
     } finally {
@@ -140,13 +145,27 @@ export const GroupCreationForm: React.FC = () => {
     }
   }
 
+  const hasErrors = submitted && Object.keys(errors).length > 0
 
+  const handleAddMember = () => {
+    const value = memberInput.trim()
+    if (!value || formData.invitedMembers.includes(value)) return
+    setFormData((prev) => ({ ...prev, invitedMembers: [...prev.invitedMembers, value] }))
+    setMemberInput('')
+  }
+
+  const handleRemoveMember = (member: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      invitedMembers: prev.invitedMembers.filter((m) => m !== member),
+    }))
+  }
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-2">Create a New Group</h1>
-      <p className="text-sm text-gray-600 mb-6">
-        Fill out the form below to create a new Ajo group. Fields marked with <span className="text-red-600 font-semibold">*</span> are required.
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow dark:shadow-slate-900/50 p-6 max-w-2xl border border-gray-100 dark:border-slate-700">
+      <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-slate-100">Create a New Group</h1>
+      <p className="text-sm text-gray-600 dark:text-slate-400 mb-6">
+        Fill out the form below to create a new Ajo group. Fields marked with <span className="text-red-600 dark:text-red-400 font-semibold">*</span> are required.
       </p>
 
       {hasErrors && (
@@ -155,13 +174,13 @@ export const GroupCreationForm: React.FC = () => {
           role="alert"
           aria-live="assertive"
           aria-atomic="true"
-          className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+          className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
           tabIndex={-1}
         >
-          <h2 className="text-sm font-semibold text-red-800 mb-2">
+          <h2 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2">
             {Object.keys(errors).length === 1 ? 'Please fix this error:' : `Please fix ${Object.keys(errors).length} errors:`}
           </h2>
-          <ul className="text-sm text-red-700 space-y-1">
+          <ul className="text-sm text-red-700 dark:text-red-300 space-y-1">
             {Object.entries(errors).map(([field, error]) => (
               error && (
                 <li key={field}>
@@ -189,15 +208,15 @@ export const GroupCreationForm: React.FC = () => {
             onChange={handleChange}
             onBlur={handleBlur}
             placeholder="e.g., Market Women Ajo"
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-              touched.groupName && errors.groupName ? 'border-red-500 bg-red-50' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-indigo-400 transition bg-white dark:bg-slate-700/50 text-gray-900 dark:text-slate-100 ${
+              touched.groupName && errors.groupName ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-slate-600'
             }`}
             aria-required="true"
             aria-invalid={touched.groupName && !!errors.groupName}
             aria-describedby={`groupName-help${touched.groupName && errors.groupName ? ' groupName-error' : ''}`}
             required
           />
-          <p id="groupName-help" className="mt-2 text-xs text-gray-600">
+          <p id="groupName-help" className="mt-2 text-xs text-gray-600 dark:text-slate-400">
             Enter a descriptive name for your group (3-100 characters)
           </p>
           {touched.groupName && errors.groupName && (
@@ -218,14 +237,14 @@ export const GroupCreationForm: React.FC = () => {
             onChange={handleChange}
             onBlur={handleBlur}
             placeholder="Describe your group's purpose..."
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-              touched.description && errors.description ? 'border-red-500 bg-red-50' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-indigo-400 transition bg-white dark:bg-slate-700/50 text-gray-900 dark:text-slate-100 ${
+              touched.description && errors.description ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-slate-600'
             }`}
             rows={3}
             aria-invalid={touched.description && !!errors.description}
             aria-describedby={`description-help${touched.description && errors.description ? ' description-error' : ''}`}
           />
-          <p id="description-help" className="mt-2 text-xs text-gray-600">
+          <p id="description-help" className="mt-2 text-xs text-gray-600 dark:text-slate-400">
             Provide context about your group's goals and purpose (max 500 characters)
           </p>
           {touched.description && errors.description && (
@@ -247,8 +266,8 @@ export const GroupCreationForm: React.FC = () => {
               value={formData.cycleLength}
               onChange={handleChange}
               onBlur={handleBlur}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                touched.cycleLength && errors.cycleLength ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-indigo-400 transition bg-white dark:bg-slate-700/50 text-gray-900 dark:text-slate-100 ${
+                touched.cycleLength && errors.cycleLength ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-slate-600'
               }`}
               min="1"
               max="365"
@@ -257,7 +276,7 @@ export const GroupCreationForm: React.FC = () => {
               aria-describedby={`cycleLength-help${touched.cycleLength && errors.cycleLength ? ' cycleLength-error' : ''}`}
               required
             />
-            <p id="cycleLength-help" className="mt-2 text-xs text-gray-600">
+            <p id="cycleLength-help" className="mt-2 text-xs text-gray-600 dark:text-slate-400">
               How many days between each payout cycle (1-365)
             </p>
             {touched.cycleLength && errors.cycleLength && (
@@ -279,8 +298,8 @@ export const GroupCreationForm: React.FC = () => {
               value={formData.contributionAmount}
               onChange={handleChange}
               onBlur={handleBlur}
-              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                touched.contributionAmount && errors.contributionAmount ? 'border-red-500 bg-red-50' : 'border-gray-300'
+              className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-indigo-400 transition bg-white dark:bg-slate-700/50 text-gray-900 dark:text-slate-100 ${
+                touched.contributionAmount && errors.contributionAmount ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-slate-600'
               }`}
               min="0"
               max="1000000"
@@ -289,7 +308,7 @@ export const GroupCreationForm: React.FC = () => {
               aria-describedby={`contributionAmount-help${touched.contributionAmount && errors.contributionAmount ? ' contributionAmount-error' : ''}`}
               required
             />
-            <p id="contributionAmount-help" className="mt-2 text-xs text-gray-600">
+            <p id="contributionAmount-help" className="mt-2 text-xs text-gray-600 dark:text-slate-400">
               Amount each member must contribute per cycle
             </p>
             {touched.contributionAmount && errors.contributionAmount && (
@@ -311,8 +330,8 @@ export const GroupCreationForm: React.FC = () => {
             value={formData.maxMembers}
             onChange={handleChange}
             onBlur={handleBlur}
-            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ${
-              touched.maxMembers && errors.maxMembers ? 'border-red-500 bg-red-50' : 'border-gray-300'
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-indigo-400 transition bg-white dark:bg-slate-700/50 text-gray-900 dark:text-slate-100 ${
+              touched.maxMembers && errors.maxMembers ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-300 dark:border-slate-600'
             }`}
             min="2"
             max="50"
@@ -321,7 +340,7 @@ export const GroupCreationForm: React.FC = () => {
             aria-describedby={`maxMembers-help${touched.maxMembers && errors.maxMembers ? ' maxMembers-error' : ''}`}
             required
           />
-          <p id="maxMembers-help" className="mt-2 text-xs text-gray-600">
+          <p id="maxMembers-help" className="mt-2 text-xs text-gray-600 dark:text-slate-400">
             Maximum number of members allowed in this group (2-50)
           </p>
           {touched.maxMembers && errors.maxMembers && (
@@ -333,11 +352,11 @@ export const GroupCreationForm: React.FC = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold mb-2">Frequency</label>
+            <label className="block text-sm font-semibold mb-2 text-gray-900 dark:text-slate-100">Frequency</label>
             <select
               value={formData.frequency}
               onChange={(e) => setFormData({ ...formData, frequency: e.target.value as 'weekly' | 'monthly' })}
-              className="w-full px-4 py-2 border rounded-lg"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700/50 text-gray-900 dark:text-slate-100"
               required
             >
               <option value="weekly">Weekly</option>
@@ -346,20 +365,20 @@ export const GroupCreationForm: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2">Duration (cycles)</label>
+            <label className="block text-sm font-semibold mb-2 text-gray-900 dark:text-slate-100">Duration (cycles)</label>
             <input
               type="number"
               value={formData.duration}
               onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
               min="1"
-              className="w-full px-4 py-2 border rounded-lg"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700/50 text-gray-900 dark:text-slate-100"
               required
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold mb-2">Invite Members</label>
+          <label className="block text-sm font-semibold mb-2 text-gray-900 dark:text-slate-100">Invite Members</label>
           <div className="flex gap-2 mb-2">
             <input
               type="text"
@@ -367,12 +386,12 @@ export const GroupCreationForm: React.FC = () => {
               onChange={(e) => setMemberInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddMember())}
               placeholder="Enter wallet address, email, or username"
-              className="flex-1 px-4 py-2 border rounded-lg"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700/50 text-gray-900 dark:text-slate-100 placeholder-gray-500 dark:placeholder-slate-400"
             />
             <button
               type="button"
               onClick={handleAddMember}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg"
+              className="px-4 py-2 bg-gray-200 dark:bg-slate-600 hover:bg-gray-300 dark:hover:bg-slate-500 text-gray-900 dark:text-slate-100 rounded-lg transition-colors"
             >
               Add
             </button>
@@ -382,13 +401,13 @@ export const GroupCreationForm: React.FC = () => {
               {formData.invitedMembers.map((member) => (
                 <span
                   key={member}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-indigo-900/40 text-blue-800 dark:text-indigo-200 rounded-full text-sm"
                 >
                   {member}
                   <button
                     type="button"
                     onClick={() => handleRemoveMember(member)}
-                    className="hover:text-blue-600"
+                    className="hover:text-blue-600 dark:hover:text-indigo-300"
                   >
                     ×
                   </button>
@@ -398,32 +417,32 @@ export const GroupCreationForm: React.FC = () => {
           )}
         </div>
 
-        <div className="bg-gray-50 rounded-lg p-4 border">
-          <h3 className="text-lg font-semibold mb-3">Preview</h3>
+        <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4 border border-gray-200 dark:border-slate-600">
+          <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-slate-100">Preview</h3>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Group Name:</span>
-              <span className="font-medium">{formData.groupName || 'Not set'}</span>
+              <span className="text-gray-600 dark:text-slate-400">Group Name:</span>
+              <span className="font-medium text-gray-900 dark:text-slate-100">{formData.groupName || 'Not set'}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Frequency:</span>
-              <span className="font-medium capitalize">{formData.frequency}</span>
+              <span className="text-gray-600 dark:text-slate-400">Frequency:</span>
+              <span className="font-medium capitalize text-gray-900 dark:text-slate-100">{formData.frequency}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Duration:</span>
-              <span className="font-medium">{formData.duration} cycles</span>
+              <span className="text-gray-600 dark:text-slate-400">Duration:</span>
+              <span className="font-medium text-gray-900 dark:text-slate-100">{formData.duration} cycles</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Contribution:</span>
-              <span className="font-medium">${formData.contributionAmount}</span>
+              <span className="text-gray-600 dark:text-slate-400">Contribution:</span>
+              <span className="font-medium text-gray-900 dark:text-slate-100">${formData.contributionAmount}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Max Members:</span>
-              <span className="font-medium">{formData.maxMembers}</span>
+              <span className="text-gray-600 dark:text-slate-400">Max Members:</span>
+              <span className="font-medium text-gray-900 dark:text-slate-100">{formData.maxMembers}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-600">Invited Members:</span>
-              <span className="font-medium">{formData.invitedMembers.length}</span>
+              <span className="text-gray-600 dark:text-slate-400">Invited Members:</span>
+              <span className="font-medium text-gray-900 dark:text-slate-100">{formData.invitedMembers.length}</span>
             </div>
           </div>
         </div>
@@ -431,7 +450,7 @@ export const GroupCreationForm: React.FC = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-2 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="w-full bg-blue-600 dark:bg-indigo-600 hover:bg-blue-700 dark:hover:bg-indigo-500 disabled:bg-gray-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-semibold py-2 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
           aria-busy={loading}
           aria-label={loading ? 'Creating group, please wait' : 'Create group'}
         >

@@ -10,13 +10,23 @@ export const metadata: Metadata = {
   description: 'Join and manage savings groups on the Stellar blockchain',
 }
 
+const themeScript = `(function(){
+  var k='soroban-ajo-theme';
+  var v=localStorage.getItem(k);
+  var r=v==='dark'?'dark':v==='light'?'light':window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+  document.documentElement.classList.add(r);
+})();`
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className={inter.className}>
         <Providers>{children}</Providers>
       </body>
