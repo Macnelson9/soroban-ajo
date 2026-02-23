@@ -44,16 +44,25 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+import { Toaster } from 'react-hot-toast'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body className={inter.className}>
         <Providers>
           <AppLayout>{children}</AppLayout>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              className: 'text-sm font-medium',
+              style: {
+                borderRadius: '8px',
+                background: '#333',
+                color: '#fff',
+              },
+            }}
+          />
         </Providers>
       </body>
     </html>
